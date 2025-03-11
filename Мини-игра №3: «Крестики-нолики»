@@ -1,0 +1,102 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <limits>
+
+// Функция для отображения игрового поля
+void printField(const std::vector<char>& field) {
+    std::cout << " " << field[0] << " | " << field[1] << " | " << field[2] << " \n";
+    std::cout << "---+---+---\n";
+    std::cout << " " << field[3] << " | " << field[4] << " | " << field[5] << " \n";
+    std::cout << "---+---+---\n";
+    std::cout << " " << field[6] << " | " << field[7] << " | " << field[8] << " \n";
+}
+
+// Функция для проверки выигрышных комбинаций
+bool checkWin(const std::vector<char>& field, char player) {
+    const int winCombos[8][3] = {
+        {0, 1, 2}, // первая строка
+        {3, 4, 5}, // вторая строка
+        {6, 7, 8}, // третья строка
+        {0, 3, 6}, // первый столбец
+        {1, 4, 7}, // второй столбец
+        {2, 5, 8}, // третий столбец
+        {0, 4, 8}, // главная диагональ
+        {2, 4, 6}  // побочная диагональ
+    };
+
+    for (int i = 0; i < 8; ++i) {
+        if (field[winCombos[i][0]] == player &&
+            field[winCombos[i][1]] == player &&
+            field[winCombos[i][2]] == player) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Функция для проверки, является ли ход допустимым
+bool isValidMove(const std::vector<char>& field, int move) {
+    return move >= 1 && move <= 9 && field[move - 1] != 'X' && field[move - 1] != 'O';
+}
+
+// Функция для получения и проверки ввода от игрока
+int getPlayerMove(const std::vector<char>& field) {
+    int move;
+    while (true) {
+        std::cout << "Введите номер клетки (1-9): ";
+        std::cin >> move;
+
+        // Проверка на некорректный ввод
+        if (std::cin.fail()) {
+            std::cin.clear(); // очищаем флаг ошибки
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // игнорируем некорректный ввод
+            std::cout << "Неверный ввод. Пожалуйста, введите число от 1 до 9.\n";
+        } else if (!isValidMove(field, move)) {
+            std::cout << "Эта клетка уже занята или номер вне диапазона. Попробуйте снова.\n";
+        } else {
+            break;
+        }
+    }
+    return move;
+}
+
+int main() {
+    std::vector<char> field = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
+    char currentPlayer = 'X';
+    int moves = 0;
+
+    while (true) {
+        printField(field);
+        int move = getPlayerMove(field);
+        field[move - 1] = currentPlayer;  // Совершаем ход
+
+        // Проверка на победу
+        if (checkWin(field, currentPlayer)) {
+            printField(field);
+            std::cout << "Игрок " << currentPlayer << " победил!\n";
+            break;
+        }
+
+        // Проверка на ничью
+        if (++moves == 9) {
+            printField(field);
+            std::cout << "Ничья! Все клетки заняты.\n";
+            break;
+        }
+
+        // Смена игрока
+        currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
+    }
+
+    // Вопрос о продолжении игры
+    char playAgain;
+    std::cout << "Хотите сыграть снова? (y/n): ";
+    std::cin >> playAgain;
+
+    if (playAgain == 'y' || playAgain == 'Y') {
+        main(); // Перезапуск игры
+    }
+
+    return 0;
+}
