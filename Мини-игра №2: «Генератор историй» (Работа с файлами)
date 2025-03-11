@@ -1,0 +1,110 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cstdlib> // Для rand() и srand()
+#include <ctime>   // Для инициализации генератора случайных чисел
+#include <fstream> // Для работы с файлами
+
+// Функция инициализации данных
+void initializeData(std::vector<std::string>& heroes,
+                    std::vector<std::string>& places,
+                    std::vector<std::string>& actions,
+                    std::vector<std::string>& details) {
+    // Набор героев
+    heroes = {
+        "смелый рыцарь", "хитрый вор", "волшебник", 
+        "отважный пират", "дерзкий исследователь"
+    };
+
+    // Набор мест действия
+    places = {
+        "в далёком королевстве", "на заброшенной фабрике", 
+        "в густом лесу", "на просторах космоса", 
+        "у подножия гор"
+    };
+
+    // Набор событий
+    actions = {
+        "победил дракона", "обнаружил сокровища", 
+        "выиграл битву", "устроил бал", "раскрыл древнюю тайну"
+    };
+
+    // Набор деталей
+    details = {
+        "с волшебным мечом", "на летающем ковре", 
+        "под звуки волшебной музыки", "с удивительной силой", 
+        "в сопровождении магического существа"
+    };
+}
+
+// Функция генерации истории
+std::string generateStory(const std::vector<std::string>& heroes,
+                          const std::vector<std::string>& places,
+                          const std::vector<std::string>& actions,
+                          const std::vector<std::string>& details) {
+    // Генерация случайных индексов для каждого набора
+    int heroIndex = std::rand() % heroes.size();
+    int placeIndex = std::rand() % places.size();
+    int actionIndex = std::rand() % actions.size();
+    int detailIndex = std::rand() % details.size();
+
+    // Формируем историю
+    return heroes[heroIndex] + " " + places[placeIndex] + ", " +
+           actions[actionIndex] + " " + details[detailIndex] + ".";
+}
+
+// Функция сохранения истории в файл
+void saveStory(const std::string& story) {
+    char saveChoice;
+    std::cout << "\nСохранить историю в файл (stories.txt)? (Y/N): ";
+    std::cin >> saveChoice;
+
+    if (saveChoice == 'Y' || saveChoice == 'y') {
+        // Открытие файла для дозаписи
+        std::ofstream outFile("stories.txt", std::ios::app);
+        if (outFile.is_open()) {
+            outFile << story << "\n";
+            outFile.close();
+            std::cout << "История сохранена в файл stories.txt\n";
+        } else {
+            std::cout << "Ошибка открытия файла для записи!\n";
+        }
+    }
+}
+
+// Функция для проверки, хочет ли пользователь продолжить игру
+bool askPlayAgain() {
+    char playAgain;
+    std::cout << "\nХотите сгенерировать новую историю? (Y/N): ";
+    std::cin >> playAgain;
+    return (playAgain == 'Y' || playAgain == 'y');
+}
+
+int main() {
+    // Инициализация генератора случайных чисел
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
+    // Подготовка данных
+    std::vector<std::string> heroes;
+    std::vector<std::string> places;
+    std::vector<std::string> actions;
+    std::vector<std::string> details;
+
+    initializeData(heroes, places, actions, details);
+
+    // Основной игровой цикл
+    do {
+        // Генерация истории
+        std::string story = generateStory(heroes, places, actions, details);
+
+        // Вывод истории на экран
+        std::cout << "\nСгенерированная история:\n" << story << std::endl;
+
+        // Сохранение истории в файл
+        saveStory(story);
+
+    } while (askPlayAgain()); // Повторяем, если пользователь хочет сгенерировать новую историю
+
+    std::cout << "Спасибо за игру! До свидания!\n";
+    return 0;
+}
