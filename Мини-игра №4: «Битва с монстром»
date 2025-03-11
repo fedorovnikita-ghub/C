@@ -1,0 +1,97 @@
+#include <iostream>
+#include <string>
+#include <cstdlib>
+#include <ctime>
+
+// Структура для описания персонажа
+struct Character {
+    std::string name;
+    int health;
+    int attack;
+    int defense;
+
+    // Функция атаки: наносит урон цели
+    void attackTarget(Character &target) {
+        int damage = attack - target.defense;
+        if (damage < 0) damage = 0; // Урон не может быть меньше нуля
+        std::cout << name << " атакует " << target.name << " и наносит " << damage << " единиц урона.\n";
+        target.health -= damage;
+    }
+
+    // Функция для проверки, жив ли персонаж
+    bool isAlive() const {
+        return health > 0;
+    }
+};
+
+// Функция для отображения состояния боя
+void printStatus(const Character &hero, const Character &monster) {
+    std::cout << "\n--- Статус сражения ---\n";
+    std::cout << hero.name << " (Здоровье: " << hero.health << ", Защита: " << hero.defense << ")\n";
+    std::cout << monster.name << " (Здоровье: " << monster.health << ", Защита: " << monster.defense << ")\n";
+    std::cout << "-------------------------\n\n";
+}
+
+// Функция для очистки экрана (для Windows)
+void clearScreen() {
+    system("cls");  // Для Linux/Mac используйте system("clear");
+}
+
+// Функция для обработки ввода
+int getInput() {
+    int choice;
+    while (true) {
+        std::cout << "Выберите действие:\n";
+        std::cout << "1. Атаковать\n";
+        std::cout << "2. Пропустить ход\n";
+        std::cin >> choice;
+        if (choice == 1 || choice == 2) {
+            return choice;
+        } else {
+            std::cout << "Неверный выбор. Попробуйте снова.\n";
+        }
+    }
+}
+
+int main() {
+    srand(time(0)); // Инициализация генератора случайных чисел
+
+    // Создаем персонажей
+    Character hero = {"Герой", 100, 20, 5};
+    Character monster = {"Монстр", 80, 15, 3};
+
+    while (hero.isAlive() && monster.isAlive()) {
+        clearScreen();
+        printStatus(hero, monster);
+
+        // Ход игрока
+        int action = getInput();
+        if (action == 1) {
+            hero.attackTarget(monster);  // Герой атакует
+        }
+
+        // Если монстр еще жив, он атакует
+        if (monster.isAlive()) {
+            monster.attackTarget(hero);  // Монстр атакует
+        }
+    }
+
+    // Определяем победителя
+    clearScreen();
+    printStatus(hero, monster);
+    if (hero.isAlive()) {
+        std::cout << hero.name << " победил!\n";
+    } else {
+        std::cout << monster.name << " победил!\n";
+    }
+
+    // Предлагаем сыграть заново
+    char replay;
+    std::cout << "Хотите сыграть снова? (y/n): ";
+    std::cin >> replay;
+    if (replay == 'y' || replay == 'Y') {
+        main();  // Рекурсивный вызов для новой игры
+    }
+
+    return 0;
+}
