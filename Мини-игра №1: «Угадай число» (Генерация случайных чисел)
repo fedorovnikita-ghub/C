@@ -1,0 +1,62 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <limits>
+#include <random>  // Добавляем заголовочный файл для случайных чисел
+
+void playGame() {
+    std::random_device rd;
+    std::mt19937 gen(rd()); // Инициализация генератора случайных чисел
+    std::uniform_int_distribution<> distrib(-430, 70); // Диапазон от -430 до 70
+
+    int secretNumber = distrib(gen); // Загадать число
+    int userGuess = 0;
+    int attempts = 0;
+    const int maxAttempts = 10; // Максимум 10 попыток
+
+    std::cout << "Добро пожаловать в игру 'Угадай число'!" << std::endl;
+    std::cout << "Загадано число в диапазоне от -430 до 70." << std::endl;
+
+    // Основной игровой цикл
+    while (userGuess != secretNumber && attempts < maxAttempts) {
+        std::cout << "Введите ваше предположение: ";
+        
+        // Проверка корректности ввода
+        while (!(std::cin >> userGuess)) {
+            std::cin.clear(); // Очистить флаг ошибки
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Игнорировать неправильный ввод
+            std::cout << "Пожалуйста, введите число!" << std::endl;
+            std::cout << "Попробуйте снова: ";
+        }
+
+        attempts++;
+
+        if (userGuess < secretNumber) {
+            std::cout << "Загаданное число больше." << std::endl;
+        } else if (userGuess > secretNumber) {
+            std::cout << "Загаданное число меньше." << std::endl;
+        } else {
+            std::cout << "Поздравляем! Вы угадали число " << secretNumber << " за " << attempts << " попыток!" << std::endl;
+            break;
+        }
+
+        if (attempts >= maxAttempts) {
+            std::cout << "Вы исчерпали все попытки. Загаданное число было " << secretNumber << "." << std::endl;
+            break;
+        }
+    }
+    
+    // Предложение сыграть снова
+    char playAgain;
+    std::cout << "Хотите сыграть снова? (y/n): ";
+    std::cin >> playAgain;
+
+    if (playAgain == 'y' || playAgain == 'Y') {
+        playGame();
+    }
+}
+
+int main() {
+    playGame();
+    return 0;
+}
