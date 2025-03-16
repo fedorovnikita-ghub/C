@@ -1,0 +1,103 @@
+#include "raylib.h"
+#include <cstdlib>
+#include <ctime>
+
+const int screenWidth = 1280;
+const int screenHeight = 720;
+
+struct Character {
+    Vector2 position;
+    int health;
+    int speed;
+};
+
+Character player = {{100, 300}, 100, 5};
+Character monster = {{900, 300}, 50, 2};
+bool gameOver = false;
+bool gameStarted = false;
+const int attackDamage = 10;
+Sound attackSound;
+Sound hitSound;
+Music backgroundMusic;
+
+void UpdatePlayer() {
+    if (IsKeyDown(KEY_RIGHT)) player.position.x += player.speed;
+    if (IsKeyDown(KEY_LEFT)) player.position.x -= player.speed;
+    if (IsKeyDown(KEY_UP)) player.position.y -= player.speed;
+    if (IsKeyDown(KEY_DOWN)) player.position.y += player.speed;
+}
+
+void UpdateMonster() {
+    if (monster.position.x < player.position.x) monster.position.x += monster.speed;
+    if (monster.position.x > player.position.x) monster.position.x -= monster.speed;
+    if (monster.position.y < player.position.y) monster.position.y += monster.speed;
+    if (monster.position.y > player.position.y) monster.position.y -= monster.speed;
+}
+
+void CheckCollision() {
+    if (CheckCollisionCircles(player.position, 30, monster.position, 30)) {
+        if (IsKeyPressed(KEY_SPACE)) {
+            monster.health -= attackDamage;
+            PlaySound(attackSound);
+        }
+        if (monster.health > 0) {
+            player.health -= attackDamage / 2;
+            PlaySound(hitSound);
+        }
+        if (player.health <= 0) gameOver = true;
+        if (monster.health <= 0) gameOver = true;
+    }
+}
+
+void DrawGame() {
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+
+    if (!gameStarted) {
+        DrawText("Battle with Monster", 400, 200, 40, DARKBLUE);
+        DrawText("Press ENTER to Start", 450, 350, 30, DARKGRAY);
+    } else if (!gameOver) {
+        DrawCircleV(player.position, 30, BLUE);
+        DrawCircleV(monster.position, 30, RED);
+        DrawText(TextFormat("Player Health: %d", player.health), 50, 50, 20, BLACK);
+        DrawText(TextFormat("Monster Health: %d", monster.health), 1000, 50, 20, BLACK);
+    } else {
+        DrawText("Game Over", 550, 300, 40, DARKRED);
+    }
+    
+    EndDrawing();
+}
+
+int main() {
+    InitWindow(screenWidth, screenHeight, "Battle with Monster");
+    InitAudioDevice();
+    
+    attackSound = LoadSound("attack.wav");
+    hitSound = LoadSound("hit.wav");
+    backgroundMusic = LoadMusicStream("background.mp3");
+    PlayMusicStream(backgroundMusic);
+    
+    SetTargetFPS(60);
+    srand(time(0));
+    
+    while (!WindowShouldClose()) {
+        UpdateMusicStream(backgroundMusic);
+        if (IsKeyPressed(KEY_ENTER)) gameStarted = true;
+        
+        if (gameStarted && !gameOver) {
+            UpdatePlayer();
+            UpdateMonster();
+            CheckCollision();
+        }
+        
+        DrawGame();
+    }
+    
+    UnloadSound(attackSound);
+    UnloadSound(hitSound);
+    UnloadMusicStream(backgroundMusic);
+    CloseAudioDevice();
+    CloseWindow();
+    
+    return 0;
+}
