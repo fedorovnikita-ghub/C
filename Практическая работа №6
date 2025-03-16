@@ -1,0 +1,68 @@
+#include "raylib.h"
+#include <ctime>
+#include <string>
+
+enum Choice { NONE, ROCK, PAPER, SCISSORS };
+
+Choice GetComputerChoice() {
+    return static_cast<Choice>(GetRandomValue(1, 3));
+}
+
+std::string GetChoiceName(Choice choice) {
+    switch (choice) {
+        case ROCK: return "Rock";
+        case PAPER: return "Paper";
+        case SCISSORS: return "Scissors";
+        default: return "None";
+    }
+}
+
+std::string GetResult(Choice player, Choice computer) {
+    if (player == computer) return "Draw!";
+    if ((player == ROCK && computer == SCISSORS) ||
+        (player == SCISSORS && computer == PAPER) ||
+        (player == PAPER && computer == ROCK)) {
+        return "You Win!";
+    }
+    return "You Lose!";
+}
+
+int main() {
+    InitWindow(800, 600, "Rock Paper Scissors");
+    SetTargetFPS(60);
+    srand(time(nullptr));
+
+    Choice playerChoice = NONE;
+    Choice computerChoice = NONE;
+    std::string result = "Make your choice!";
+    
+    while (!WindowShouldClose()) {
+        if (IsKeyPressed(KEY_R)) playerChoice = ROCK;
+        if (IsKeyPressed(KEY_P)) playerChoice = PAPER;
+        if (IsKeyPressed(KEY_S)) playerChoice = SCISSORS;
+        
+        if (playerChoice != NONE) {
+            computerChoice = GetComputerChoice();
+            result = GetResult(playerChoice, computerChoice);
+        }
+        
+        if (IsKeyPressed(KEY_SPACE)) {
+            playerChoice = NONE;
+            computerChoice = NONE;
+            result = "Make your choice!";
+        }
+
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+        DrawText("Rock, Paper, Scissors!", 250, 50, 30, DARKGRAY);
+        DrawText("Press R for Rock, P for Paper, S for Scissors", 200, 100, 20, DARKGRAY);
+        DrawText(("You chose: " + GetChoiceName(playerChoice)).c_str(), 250, 200, 20, BLACK);
+        DrawText(("Computer chose: " + GetChoiceName(computerChoice)).c_str(), 250, 250, 20, BLACK);
+        DrawText(result.c_str(), 250, 350, 30, RED);
+        DrawText("Press SPACE to restart", 250, 450, 20, DARKGRAY);
+        EndDrawing();
+    }
+
+    CloseWindow();
+    return 0;
+}
